@@ -17,9 +17,9 @@ defmodule RockPaperScissorsPartOne do
     moves
     |> Enum.map(fn move ->
       with {_, my_move} <- move,
-           {:ok, result} <- outcome(move),
-           {:ok, outcome_score} <- OutcomeScore.calculate(result),
-           {:ok, choice_score} <- ChoiceScore.calculate(my_move) do
+           result <- outcome(move),
+           outcome_score <- OutcomeScore.calculate(result),
+           choice_score <- ChoiceScore.calculate(my_move) do
         outcome_score + choice_score
       end
     end)
@@ -27,25 +27,25 @@ defmodule RockPaperScissorsPartOne do
   end
 
   defp parse_move(line) do
-    with {:ok, their_move} <- String.at(line, 0) |> to_move_type(),
-         {:ok, my_move} <- String.at(line, 2) |> to_move_type() do
+    with their_move <- String.at(line, 0) |> to_move_type(),
+         my_move <- String.at(line, 2) |> to_move_type() do
       {their_move, my_move}
     end
   end
 
-  defp to_move_type(move) when move in ["A", "X"], do: {:ok, :rock}
-  defp to_move_type(move) when move in ["B", "Y"], do: {:ok, :paper}
-  defp to_move_type(move) when move in ["C", "Z"], do: {:ok, :scissors}
-  defp to_move_type(move), do: {:error, "Invalid move type: #{move}"}
+  defp to_move_type(move) when move in ["A", "X"], do: :rock
+  defp to_move_type(move) when move in ["B", "Y"], do: :paper
+  defp to_move_type(move) when move in ["C", "Z"], do: :scissors
+  defp to_move_type(move), do: raise("Invalid move type: #{move}")
 
-  defp outcome({a, b}) when a == b, do: {:ok, :draw}
-  defp outcome({:rock, :scissors}), do: {:ok, :loss}
-  defp outcome({:paper, :rock}), do: {:ok, :loss}
-  defp outcome({:scissors, :paper}), do: {:ok, :loss}
-  defp outcome({:rock, :paper}), do: {:ok, :win}
-  defp outcome({:paper, :scissors}), do: {:ok, :win}
-  defp outcome({:scissors, :rock}), do: {:ok, :win}
-  defp outcome(move), do: {:error, "Unknown move combination: #{move}"}
+  defp outcome({a, b}) when a == b, do: :draw
+  defp outcome({:rock, :scissors}), do: :loss
+  defp outcome({:paper, :rock}), do: :loss
+  defp outcome({:scissors, :paper}), do: :loss
+  defp outcome({:rock, :paper}), do: :win
+  defp outcome({:paper, :scissors}), do: :win
+  defp outcome({:scissors, :rock}), do: :win
+  defp outcome(move), do: raise("Unknown move combination: #{move}")
 end
 
 defmodule RockPaperScissorsPartTwo do
@@ -62,8 +62,8 @@ defmodule RockPaperScissorsPartTwo do
     |> Enum.map(fn move ->
       with {_, result} = move,
            my_move = determine_my_move(move),
-           {:ok, outcome_score} <- OutcomeScore.calculate(result),
-           {:ok, choice_score} <- ChoiceScore.calculate(my_move) do
+           outcome_score <- OutcomeScore.calculate(result),
+           choice_score <- ChoiceScore.calculate(my_move) do
         outcome_score + choice_score
       end
     end)
@@ -71,21 +71,21 @@ defmodule RockPaperScissorsPartTwo do
   end
 
   defp parse_move(line) do
-    with {:ok, their_move} <- String.at(line, 0) |> to_move_type(),
-         {:ok, result} <- String.at(line, 2) |> to_result_type() do
+    with their_move <- String.at(line, 0) |> to_move_type(),
+         result <- String.at(line, 2) |> to_result_type() do
       {their_move, result}
     end
   end
 
-  defp to_move_type("A"), do: {:ok, :rock}
-  defp to_move_type("B"), do: {:ok, :paper}
-  defp to_move_type("C"), do: {:ok, :scissors}
-  defp to_move_type(move), do: {:error, "Invalid move type: #{move}"}
+  defp to_move_type("A"), do: :rock
+  defp to_move_type("B"), do: :paper
+  defp to_move_type("C"), do: :scissors
+  defp to_move_type(move), do: raise("Invalid move type: #{move}")
 
-  defp to_result_type("X"), do: {:ok, :loss}
-  defp to_result_type("Y"), do: {:ok, :draw}
-  defp to_result_type("Z"), do: {:ok, :win}
-  defp to_result_type(result), do: {:error, "Invalid result: #{result}"}
+  defp to_result_type("X"), do: :loss
+  defp to_result_type("Y"), do: :draw
+  defp to_result_type("Z"), do: :win
+  defp to_result_type(result), do: raise("Invalid result: #{result}")
 
   defp determine_my_move({move, :draw}), do: move
   defp determine_my_move({:rock, :win}), do: :paper
@@ -94,19 +94,19 @@ defmodule RockPaperScissorsPartTwo do
   defp determine_my_move({:rock, :loss}), do: :scissors
   defp determine_my_move({:scissors, :win}), do: :rock
   defp determine_my_move({:paper, :loss}), do: :rock
-  defp determine_my_move(move), do: {:error, "Unknown move: #{move}"}
+  defp determine_my_move(move), do: raise("Unknown move: #{move}")
 end
 
 defmodule ChoiceScore do
-  def calculate(:rock), do: {:ok, 1}
-  def calculate(:paper), do: {:ok, 2}
-  def calculate(:scissors), do: {:ok, 3}
-  def calculate(choice), do: {:error, "Invalid choice: #{choice}"}
+  def calculate(:rock), do: 1
+  def calculate(:paper), do: 2
+  def calculate(:scissors), do: 3
+  def calculate(choice), do: raise("Invalid choice: #{choice}")
 end
 
 defmodule OutcomeScore do
-  def calculate(:win), do: {:ok, 6}
-  def calculate(:draw), do: {:ok, 3}
-  def calculate(:loss), do: {:ok, 0}
-  def calculate(outcome), do: {:error, "Invalid outcome: #{outcome}"}
+  def calculate(:win), do: 6
+  def calculate(:draw), do: 3
+  def calculate(:loss), do: 0
+  def calculate(outcome), do: raise("Invalid outcome: #{outcome}")
 end
